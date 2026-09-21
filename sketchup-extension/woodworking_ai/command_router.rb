@@ -107,7 +107,8 @@ module WoodworkingAI
          owned_scene_count: Sketchup.active_model.pages.count { |page| page.get_attribute(DICTIONARY,'project_id') == id },
          total_root_entities: Sketchup.active_model.entities.length}
       when 'get_model'
-        Projects.read(params['project_id'])
+        value = Sketchup.active_model.get_attribute(Projects::DICT, params['project_id'])
+        value ? JSON.parse(value) : {'revision' => nil, 'definition' => nil}
       when 'get_parts'
         {parts: Projects.instances(Sketchup.active_model, params['project_id']).map { |part| describe(part) }}
       when 'update_part', 'move_part', 'delete_part'
