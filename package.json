@@ -1,0 +1,25 @@
+{
+  "name": "sketchup-woodworking-ai",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local SketchUp woodworking MCP and Ruby extension",
+  "scripts": {
+    "test": "npm run test:ruby && vitest run",
+    "build": "tsc",
+    "test:ruby": "ruby sketchup-extension/tests/units_test.rb && ruby sketchup-extension/tests/bridge_test.rb && ruby sketchup-extension/tests/project_validation_test.rb && ruby sketchup-extension/tests/project_transaction_test.rb && ruby sketchup-extension/tests/reports_test.rb && ruby sketchup-extension/tests/save_model_test.rb",
+    "test:live": "node scripts/test-mcp.mjs",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "yaml": "^2.9.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "node": "^24.21.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.1"
+  }
+}

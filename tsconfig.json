@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "outDir": "dist",
+    "rootDir": "mcp/src",
+    "types": [
+      "node"
+    ]
+  },
+  "include": [
+    "mcp/src/**/*.ts"
+  ]
+}

@@ -1,0 +1,299 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "project": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "units": {
+          "type": "string",
+          "const": "inches"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "units"
+      ],
+      "additionalProperties": false
+    },
+    "overall": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "depth": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "width",
+        "depth",
+        "height"
+      ],
+      "additionalProperties": false
+    },
+    "materials": {
+      "minItems": 1,
+      "maxItems": 100,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+          },
+          "species": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "hardwood",
+              "softwood",
+              "plywood",
+              "sheet_good"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "species",
+          "type"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "parts": {
+      "maxItems": 200,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "board",
+              "panel"
+            ]
+          },
+          "material": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "dimensions": {
+            "type": "object",
+            "properties": {
+              "length": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "width": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "thickness": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "required": [
+              "length",
+              "width",
+              "thickness"
+            ],
+            "additionalProperties": false
+          },
+          "position": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              },
+              "z": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "z"
+            ],
+            "additionalProperties": false
+          },
+          "rotation": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              },
+              "z": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "z"
+            ],
+            "additionalProperties": false
+          },
+          "additional_positions": {
+            "maxItems": 99,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "x": {
+                  "type": "number"
+                },
+                "y": {
+                  "type": "number"
+                },
+                "z": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "x",
+                "y",
+                "z"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "stock_type": {
+            "type": "string",
+            "enum": [
+              "hardwood",
+              "softwood",
+              "plywood",
+              "sheet_good"
+            ]
+          },
+          "grain_direction": {
+            "type": "string",
+            "enum": [
+              "length",
+              "width",
+              "none"
+            ]
+          },
+          "notes": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "material",
+          "quantity",
+          "dimensions",
+          "position",
+          "rotation",
+          "additional_positions",
+          "stock_type",
+          "grain_direction",
+          "notes"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "relationships": {
+      "maxItems": 200,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "part_id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+          },
+          "depends_on": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+            }
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "part_id",
+          "depends_on",
+          "description"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "notes": {
+      "maxItems": 100,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      }
+    }
+  },
+  "required": [
+    "project",
+    "overall",
+    "materials",
+    "parts",
+    "relationships",
+    "notes"
+  ],
+  "additionalProperties": false,
+  "$comment": "Canonical inches. Semantic validation also requires unique IDs, valid material/relationship references, at most 500 instances, and quantity minus one additional_positions."
+}

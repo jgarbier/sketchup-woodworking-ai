@@ -1,0 +1,236 @@
+project:
+  id: entry-bench-001
+  name: Entry Bench
+  units: inches
+overall:
+  width: 72
+  depth: 18
+  height: 30
+materials:
+  - id: white_oak
+    species: white_oak
+    type: hardwood
+parts:
+  - id: top
+    name: Bench Top
+    type: panel
+    material: white_oak
+    quantity: 1
+    dimensions:
+      length: 72
+      width: 18
+      thickness: 1
+    position:
+      x: 0
+      y: 0
+      z: 29
+    rotation:
+      x: 0
+      y: 0
+      z: 0
+    additional_positions: []
+    stock_type: hardwood
+    grain_direction: length
+    notes: []
+  - id: front_left_leg
+    name: front left leg
+    type: board
+    material: white_oak
+    quantity: 1
+    dimensions:
+      length: 29
+      width: 2
+      thickness: 2
+    position:
+      x: 0
+      y: 0
+      z: 0
+    rotation:
+      x: 0
+      y: -90
+      z: 0
+    additional_positions: []
+    stock_type: hardwood
+    grain_direction: length
+    notes: []
+  - id: rear_left_leg
+    name: rear left leg
+    type: board
+    material: white_oak
+    quantity: 1
+    dimensions:
+      length: 29
+      width: 2
+      thickness: 2
+    position:
+      x: 0
+      y: 16
+      z: 0
+    rotation:
+      x: 0
+      y: -90
+      z: 0
+    additional_positions: []
+    stock_type: hardwood
+    grain_direction: length
+    notes: []
+  - id: front_right_leg
+    name: front right leg
+    type: board
+    material: white_oak
+    quantity: 1
+    dimensions:
+      length: 29
+      width: 2
+      thickness: 2
+    position:
+      x: 70
+      y: 0
+      z: 0
+    rotation:
+      x: 0
+      y: -90
+      z: 0
+    additional_positions: []
+    stock_type: hardwood
+    grain_direction: length
+    notes: []
+  - id: rear_right_leg
+    name: rear right leg
+    type: board
+    material: white_oak
+    quantity: 1
+    dimensions:
+      length: 29
+      width: 2
+      thickness: 2
+    position:
+      x: 70
+      y: 16
+      z: 0
+    rotation:
+      x: 0
+      y: -90
+      z: 0
+    additional_positions: []
+    stock_type: hardwood
+    grain_direction: length
+    notes: []
+  - id: front_apron
+    name: Front Apron
+    type: board
+    material: white_oak
+    quantity: 1
+    dimensions:
+      length: 68
+      width: 4
+      thickness: 0.75
+    position:
+      x: 2
+      y: 0
+      z: 25
+    rotation:
+      x: 90
+      y: 0
+      z: 0
+    additional_positions: []
+    stock_type: hardwood
+    grain_direction: length
+    notes: []
+  - id: rear_apron
+    name: Rear Apron
+    type: board
+    material: white_oak
+    quantity: 1
+    dimensions:
+      length: 68
+      width: 4
+      thickness: 0.75
+    position:
+      x: 2
+      y: 17.25
+      z: 25
+    rotation:
+      x: 90
+      y: 0
+      z: 0
+    additional_positions: []
+    stock_type: hardwood
+    grain_direction: length
+    notes: []
+  - id: left_apron
+    name: Left Apron
+    type: board
+    material: white_oak
+    quantity: 1
+    dimensions:
+      length: 14
+      width: 4
+      thickness: 0.75
+    position:
+      x: 0
+      y: 2
+      z: 25
+    rotation:
+      x: 90
+      y: 0
+      z: 90
+    additional_positions: []
+    stock_type: hardwood
+    grain_direction: length
+    notes: []
+  - id: right_apron
+    name: Right Apron
+    type: board
+    material: white_oak
+    quantity: 1
+    dimensions:
+      length: 14
+      width: 4
+      thickness: 0.75
+    position:
+      x: 71.25
+      y: 2
+      z: 25
+    rotation:
+      x: 90
+      y: 0
+      z: 90
+    additional_positions: []
+    stock_type: hardwood
+    grain_direction: length
+    notes: []
+  - id: shelf
+    name: Lower Shelf
+    type: panel
+    material: white_oak
+    quantity: 1
+    dimensions:
+      length: 68
+      width: 14
+      thickness: 0.75
+    position:
+      x: 2
+      y: 2
+      z: 6
+    rotation:
+      x: 0
+      y: 0
+      z: 0
+    additional_positions: []
+    stock_type: hardwood
+    grain_direction: length
+    notes: []
+relationships:
+  - part_id: top
+    depends_on:
+      - front_left_leg
+      - front_right_leg
+      - rear_left_leg
+      - rear_right_leg
+    description: Top underside is at the tops of the legs.
+notes:
+  - Dimensional layout only. Shelf supports and fastening details remain to be
+    designed.
+  - Shelf height refers to its underside. Actual finished leg size is 2 inches
+    square.
