@@ -1,4 +1,0 @@
-# Verified local stdio server. No API key required.
-[mcp_servers.woodworking]
-command = "/Users/jamesgarbier/Documents/Codex/2026-09-21/ple/outputs/sketchup-woodworking-ai/node_modules/node/bin/node"
-args = ["/Users/jamesgarbier/Documents/Codex/2026-09-21/ple/outputs/sketchup-woodworking-ai/dist/index.js"]
