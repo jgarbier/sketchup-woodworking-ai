@@ -87,9 +87,11 @@ module WoodworkingAI
         exploded = preview(model, id, parts) if names.include?('exploded')
         old_options.each_key { |key| options[key] = desired_options[key] }
         names.each do |name|
+          door_groups = Projects.door_assembly_groups(model, id)
+          joint_groups = defined?(Joinery) ? Joinery.joint_groups(model, id) : []
           model.entities.each do |entity|
             next unless entity.respond_to?(:hidden=)
-            entity.hidden = name == 'exploded' ? entity != exploded : !parts.include?(entity)
+            entity.hidden = name == 'exploded' ? entity != exploded : (!parts.include?(entity) && !door_groups.include?(entity) && !joint_groups.include?(entity))
           end
           visible = name == 'exploded' ? [exploded] : parts
           view.camera = camera(visible, name)

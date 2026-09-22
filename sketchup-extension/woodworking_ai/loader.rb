@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require 'sketchup.rb'
 require_relative 'geometry'
+require_relative 'joinery'
 require_relative 'checkpoint'
 require_relative 'server'
 require_relative 'project_observer'

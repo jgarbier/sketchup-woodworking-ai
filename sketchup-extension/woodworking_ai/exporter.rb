@@ -23,6 +23,7 @@ module WoodworkingAI
       File.write(manifest, JSON.pretty_generate(revision: state['revision'], complete: false))
       File.write(safe_file(directory,'cut-list.csv'), Reports.cut_list(definition))
       File.write(safe_file(directory,'bill-of-materials.csv'), Reports.bom(definition))
+      File.write(safe_file(directory,'joinery-schedule.csv'), Reports.joinery_schedule(definition))
       File.write(safe_file(directory,'build-plan.md'), Reports.build_plan(definition))
       files = []
       if definition['parts'].empty?

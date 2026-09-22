@@ -55,6 +55,23 @@ module WoodworkingAI
         raise ArgumentError, 'Unknown relationship part' unless ([rel['part_id']] + rel['depends_on'] - ids).empty?
       end
       raise ArgumentError, 'Maximum 500 physical parts' if project['parts'].sum { |part| part['quantity'] } > 500
+      if (door_assemblies = project['door_assemblies'])
+        da_ids = door_assemblies.map { |da| da['id'] }
+        raise ArgumentError, 'Duplicate door assembly IDs' if da_ids.uniq != da_ids
+        door_assemblies.each do |da|
+          unknown = da['parts'] - ids
+          raise ArgumentError, "Door assembly #{da['id']} references unknown parts: #{unknown.join(', ')}" unless unknown.empty?
+        end
+      end
+      if (joints = project['joints'])
+        joint_ids = joints.map { |j| j['id'] }
+        raise ArgumentError, 'Duplicate joint IDs' if joint_ids.uniq != joint_ids
+        joints.each do |j|
+          raise ArgumentError, "Joint #{j['id']} references unknown part_a: #{j['part_a']}" unless ids.include?(j['part_a'])
+          raise ArgumentError, "Joint #{j['id']} references unknown part_b: #{j['part_b']}" unless ids.include?(j['part_b'])
+          raise ArgumentError, "Joint #{j['id']}: part_a and part_b must be different" if j['part_a'] == j['part_b']
+        end
+      end
       project
     end
   end

@@ -45,8 +45,16 @@ module WoodworkingAI
       end
     end
 
+    def self.door_assembly_groups(model, id)
+      model.entities.grep(Sketchup::Group).select do |g|
+        g.get_attribute(DICTIONARY, 'project_id') == id && g.get_attribute(DICTIONARY, 'door_assembly_id')
+      end
+    end
+
     def self.instances(model, id)
-      model.entities.grep(Sketchup::ComponentInstance).select { |e| e.get_attribute(DICTIONARY, 'project_id') == id }
+      flat = model.entities.grep(Sketchup::ComponentInstance).select { |e| e.get_attribute(DICTIONARY, 'project_id') == id }
+      nested = door_assembly_groups(model, id).flat_map { |g| g.entities.grep(Sketchup::ComponentInstance).select { |e| e.get_attribute(DICTIONARY, 'project_id') == id } }
+      flat + nested
     end
 
     def self.transform(part, spec, position)
@@ -76,6 +84,14 @@ module WoodworkingAI
         disk = JSON.parse(File.read(disk_path))
         raise 'Project files differ from active model; resolve before editing' unless old && disk['revision'] == old['revision']
       end
+      # Remove door assembly groups for assemblies no longer in the definition before
+      # collecting owned instances, so stale nested instances don't pollute the owned set.
+      current_da_keys = (definition['door_assemblies'] || []).map { |da| "#{id}/#{da['id']}" }
+      model.entities.grep(Sketchup::Group).each do |g|
+        next unless g.get_attribute(DICTIONARY, 'project_id') == id
+        da_key = g.get_attribute(DICTIONARY, 'door_assembly_id').to_s
+        g.erase! if !da_key.empty? && !current_da_keys.include?(da_key)
+      end
       owned = instances(model, id)
       raise 'Owned component is locked' if owned.any?(&:locked?)
       keys = owned.map { |e| [e.get_attribute(DICTIONARY, 'part_id'), e.get_attribute(DICTIONARY, 'instance_index', 0)] }
@@ -102,7 +118,30 @@ module WoodworkingAI
             keep << part
           end
         end
-        owned.each { |part| part.erase! unless keep.include?(part) }
+        # Move door assembly parts into named SketchUp groups.
+        (definition['door_assemblies'] || []).each do |da|
+          da_key = "#{id}/#{da['id']}"
+          group = model.entities.grep(Sketchup::Group).find { |g| g.get_attribute(DICTIONARY, 'door_assembly_id') == da_key }
+          unless group
+            group = model.entities.add_group
+            group.name = da['name']
+            group.set_attribute(DICTIONARY, 'door_assembly_id', da_key)
+            group.set_attribute(DICTIONARY, 'project_id', id)
+            group.set_attribute(DICTIONARY, 'door_swing', da['swing'])
+          end
+          da['parts'].each do |pid|
+            keep.select { |inst| inst.valid? && inst.get_attribute(DICTIONARY, 'part_id') == pid }.each do |inst|
+              new_inst = group.entities.add_instance(inst.definition, inst.transformation)
+              inst.attribute_dictionaries&.each { |dict| dict.each_pair { |k, v| new_inst.set_attribute(dict.name, k, v) } }
+              new_inst.set_attribute(DICTIONARY, 'door_assembly_id', da_key)
+              keep << new_inst
+              keep.delete(inst)
+              inst.erase!
+            end
+          end
+        end
+        owned.each { |part| part.erase! if part.valid? && !keep.include?(part) }
+        Joinery.render(model, id, definition) if defined?(Joinery)
         model.commit_operation
         started = false
       rescue StandardError

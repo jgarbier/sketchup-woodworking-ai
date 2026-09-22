@@ -3,6 +3,7 @@ require 'tmpdir'
 require_relative '../woodworking_ai/projects'
 module Sketchup
   class ComponentInstance; end
+  class Group; end
   def self.active_model; end
 end
 class FakeModel
