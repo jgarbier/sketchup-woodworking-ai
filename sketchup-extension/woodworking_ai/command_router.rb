@@ -2,6 +2,7 @@
 require_relative 'geometry'
 require_relative 'projects'
 require_relative 'exporter'
+require_relative 'drawers'
 module WoodworkingAI
   module CommandRouter
     def self.exact_keys(value, required, optional = [])
@@ -52,6 +53,17 @@ module WoodworkingAI
         exact_keys(params, %w[project_id id])
         WoodworkingAI.identifier(params['project_id'], 'project_id')
         WoodworkingAI.identifier(params['id'], 'id')
+      when 'calculate_drawer'
+        exact_keys(params, %w[opening_width opening_height opening_depth drawer_count slide_type face_style],
+                           %w[gap_between box_thickness face_thickness])
+        %w[opening_width opening_height opening_depth].each { |k| Units.number(params[k], k, positive: true) }
+        unless params['drawer_count'].is_a?(Numeric) && params['drawer_count'] == params['drawer_count'].to_i &&
+               params['drawer_count'].between?(1, 20)
+          raise ArgumentError, 'drawer_count must be an integer between 1 and 20'
+        end
+        raise ArgumentError, "slide_type must be one of: #{Drawers::SLIDE_CLEARANCES.keys.join(', ')}" unless Drawers::SLIDE_CLEARANCES.key?(params['slide_type'])
+        raise ArgumentError, "face_style must be one of: #{Drawers::OVERLAY_AMOUNTS.keys.join(', ')}" unless Drawers::OVERLAY_AMOUNTS.key?(params['face_style'])
+        %w[gap_between box_thickness face_thickness].each { |k| Units.number(params[k], k, positive: true) if params.key?(k) }
       when 'add_cutout'
         base = %w[project_id part_id shape face x y depth]
         optional = %w[radius width height]
@@ -93,7 +105,7 @@ module WoodworkingAI
       result = case request['command']
       when 'sketchup_status'
         {connected: true, sketchup_version: Sketchup.version, units: 'inches',
-         bridge_version: 3, commands: %w[sketchup_status create_board get_part create_project get_model get_parts update_part move_part delete_part fit_camera render_view save_model export_project get_model_summary add_cutout]}
+         bridge_version: 3, commands: %w[sketchup_status create_board get_part create_project get_model get_parts update_part move_part delete_part fit_camera render_view save_model export_project get_model_summary add_cutout calculate_drawer]}
       when 'create_board'
         raise ArgumentError, 'Use project tools to modify managed projects' if Sketchup.active_model.get_attribute(Projects::DICT, params['project_id'])
         args = params.transform_keys(&:to_sym)
@@ -138,6 +150,10 @@ module WoodworkingAI
         end
         raise ArgumentError, 'Part not found' if matches.empty?
         matches.size == 1 ? describe(matches.first) : {instances: matches.map { |part| describe(part) }}
+      when 'calculate_drawer'
+        args = params.transform_keys(&:to_sym)
+        args[:drawer_count] = args[:drawer_count].to_i
+        Drawers.calculate(**args)
       when 'add_cutout'
         WoodworkingAI.add_cutout(**params.transform_keys(&:to_sym))
       end

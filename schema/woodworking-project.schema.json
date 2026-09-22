@@ -322,6 +322,51 @@
         "additionalProperties": false
       }
     },
+    "drawer_assemblies": {
+      "maxItems": 50,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "parts": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+            }
+          },
+          "face_part_id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+          },
+          "slide_type": {
+            "type": "string",
+            "enum": ["side-mount", "undermount", "center-mount"]
+          },
+          "clearance_left":   { "type": "number", "exclusiveMinimum": 0 },
+          "clearance_right":  { "type": "number", "exclusiveMinimum": 0 },
+          "clearance_top":    { "type": "number", "exclusiveMinimum": 0 },
+          "clearance_bottom": { "type": "number", "exclusiveMinimum": 0 },
+          "extension": {
+            "type": "string",
+            "enum": ["full", "three-quarter"]
+          }
+        },
+        "required": ["id", "name", "parts", "slide_type"],
+        "additionalProperties": false
+      }
+    },
     "joints": {
       "maxItems": 200,
       "type": "array",

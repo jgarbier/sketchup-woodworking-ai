@@ -14,6 +14,17 @@ export const doorAssemblySchema=z.object({
  swing:z.enum(['left','right','bi-fold','sliding']),
  clearance_gap:z.number().finite().positive().optional()
 }).strict();
+export const drawerAssemblySchema=z.object({
+ id,name:text,
+ parts:z.array(id).min(1).max(50),
+ face_part_id:id.optional(),
+ slide_type:z.enum(['side-mount','undermount','center-mount']),
+ clearance_left:positive.optional(),
+ clearance_right:positive.optional(),
+ clearance_top:positive.optional(),
+ clearance_bottom:positive.optional(),
+ extension:z.enum(['full','three-quarter']).optional()
+}).strict();
 export const jointSchema=z.object({
  id,
  type:z.enum(['mortise-tenon','dado','rabbet','pocket-hole','lap','dovetail','biscuit','dowel']),
@@ -32,6 +43,7 @@ export const projectBaseSchema=z.object({
  relationships:z.array(z.object({part_id:id,depends_on:z.array(id),description:text}).strict()).max(200),
  notes:z.array(text).max(100),
  door_assemblies:z.array(doorAssemblySchema).max(50).default([]),
+ drawer_assemblies:z.array(drawerAssemblySchema).max(50).default([]),
  joints:z.array(jointSchema).max(200).default([])
 }).strict();
 export const projectSchema=projectBaseSchema.superRefine((p,ctx)=>{
@@ -48,6 +60,12 @@ export const projectSchema=projectBaseSchema.superRefine((p,ctx)=>{
  const daIds=new Set(p.door_assemblies.map(d=>d.id));
  if(daIds.size!==p.door_assemblies.length) fail('Door assembly IDs must be unique');
  for(const da of p.door_assemblies) for(const pid of da.parts) if(!partIds.has(pid)) fail(`Door assembly ${da.id} references unknown part: ${pid}`);
+ const drawerIds=new Set(p.drawer_assemblies.map(d=>d.id));
+ if(drawerIds.size!==p.drawer_assemblies.length) fail('Drawer assembly IDs must be unique');
+ for(const da of p.drawer_assemblies){
+  for(const pid of da.parts) if(!partIds.has(pid)) fail(`Drawer assembly ${da.id} references unknown part: ${pid}`);
+  if(da.face_part_id&&!partIds.has(da.face_part_id)) fail(`Drawer assembly ${da.id} face_part_id references unknown part: ${da.face_part_id}`);
+ }
  const jIds=new Set(p.joints.map(j=>j.id));
  if(jIds.size!==p.joints.length) fail('Joint IDs must be unique');
  for(const j of p.joints){
@@ -58,4 +76,5 @@ export const projectSchema=projectBaseSchema.superRefine((p,ctx)=>{
 });
 export type Project=z.infer<typeof projectSchema>;
 export type DoorAssembly=z.infer<typeof doorAssemblySchema>;
+export type DrawerAssembly=z.infer<typeof drawerAssemblySchema>;
 export type Joint=z.infer<typeof jointSchema>;

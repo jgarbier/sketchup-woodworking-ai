@@ -16,8 +16,20 @@ export const cutoutSchema = z.discriminatedUnion('shape',[
   cutoutBase.extend({shape:z.literal('circle'), radius:z.number().finite().positive()}).strict(),
   cutoutBase.extend({shape:z.literal('rectangle'), width:z.number().finite().positive(), height:z.number().finite().positive()}).strict()
 ]);
+export const calculateDrawerSchema = z.object({
+  opening_width:  z.number().finite().positive(),
+  opening_height: z.number().finite().positive(),
+  opening_depth:  z.number().finite().positive(),
+  drawer_count:   z.number().int().min(1).max(20),
+  slide_type:     z.enum(['side-mount','undermount','center-mount']),
+  face_style:     z.enum(['full-overlay','half-overlay','inset']),
+  gap_between:    z.number().finite().positive().optional(),
+  box_thickness:  z.number().finite().positive().optional(),
+  face_thickness: z.number().finite().positive().optional()
+}).strict();
 export const commandSchemas = {
  add_cutout:cutoutSchema,
+ calculate_drawer:calculateDrawerSchema,
  export_project:z.object({project_id:identifier}).strict(),
  save_model:z.object({project_id:identifier}).strict(),
  get_model_summary:z.object({project_id:identifier}).strict(),

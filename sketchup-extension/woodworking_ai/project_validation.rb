@@ -63,6 +63,17 @@ module WoodworkingAI
           raise ArgumentError, "Door assembly #{da['id']} references unknown parts: #{unknown.join(', ')}" unless unknown.empty?
         end
       end
+      if (drawer_assemblies = project['drawer_assemblies'])
+        dra_ids = drawer_assemblies.map { |da| da['id'] }
+        raise ArgumentError, 'Duplicate drawer assembly IDs' if dra_ids.uniq != dra_ids
+        drawer_assemblies.each do |da|
+          unknown = da['parts'] - ids
+          raise ArgumentError, "Drawer assembly #{da['id']} references unknown parts: #{unknown.join(', ')}" unless unknown.empty?
+          if da['face_part_id'] && !ids.include?(da['face_part_id'])
+            raise ArgumentError, "Drawer assembly #{da['id']} face_part_id references unknown part: #{da['face_part_id']}"
+          end
+        end
+      end
       if (joints = project['joints'])
         joint_ids = joints.map { |j| j['id'] }
         raise ArgumentError, 'Duplicate joint IDs' if joint_ids.uniq != joint_ids

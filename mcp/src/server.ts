@@ -18,6 +18,7 @@ export function createServer(client=new SketchupClient()) {
     sketchup_status:'Check the local SketchUp bridge and supported commands.',
     create_board:'Create or update one named rectangular component by project_id and id. All dimensions and position are inches. Local length=X, width=Y, thickness=Z. Preserves unrelated geometry; one undo operation.',
     get_part:'Read exactly one owned component by project_id and id; returns measured world-axis dimensions in inches.',
+    calculate_drawer:'Calculate drawer box and face cut dimensions from a cabinet opening. Returns exact part dimensions (sides, sub-front, back, bottom panel, face) for each drawer in a stack. All inputs and outputs in inches. Slide type drives width clearances and minimum height; face style drives overlay. Use this before create_project to get accurate drawer geometry. Does not modify the SketchUp model.',
     add_cutout:'Cut a circle or rectangle through a face of an existing part. Specify project_id, part_id, shape (circle or rectangle), face (top/bottom/front/back/right/left), x and y position on the face in inches from the component origin, depth in inches, and either radius (circle) or width+height (rectangle). x/y map to the two non-normal axes of the named face. Modifies geometry directly; run render_view to see the result.'
   };
   for(const name of Object.keys(commandSchemas) as Command[]) {
