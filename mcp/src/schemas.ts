@@ -5,7 +5,19 @@ export const position = z.object({x:z.number().finite(),y:z.number().finite(),z:
 export const boardSchema = z.object({project_id:identifier,id:identifier,name:z.string().trim().min(1).max(256),
   length:z.number().finite().positive(),width:z.number().finite().positive(),thickness:z.number().finite().positive(),position}).strict();
 export const partSchema = z.object({project_id:identifier,id:identifier}).strict();
+const cutoutBase = z.object({
+  project_id:identifier, part_id:identifier,
+  shape:z.enum(['circle','rectangle']),
+  face:z.enum(['top','bottom','front','back','right','left']),
+  x:z.number().finite(), y:z.number().finite(),
+  depth:z.number().finite().positive()
+});
+export const cutoutSchema = z.discriminatedUnion('shape',[
+  cutoutBase.extend({shape:z.literal('circle'), radius:z.number().finite().positive()}).strict(),
+  cutoutBase.extend({shape:z.literal('rectangle'), width:z.number().finite().positive(), height:z.number().finite().positive()}).strict()
+]);
 export const commandSchemas = {
+ add_cutout:cutoutSchema,
  export_project:z.object({project_id:identifier}).strict(),
  save_model:z.object({project_id:identifier}).strict(),
  get_model_summary:z.object({project_id:identifier}).strict(),

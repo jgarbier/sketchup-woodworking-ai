@@ -52,6 +52,24 @@ module WoodworkingAI
         exact_keys(params, %w[project_id id])
         WoodworkingAI.identifier(params['project_id'], 'project_id')
         WoodworkingAI.identifier(params['id'], 'id')
+      when 'add_cutout'
+        base = %w[project_id part_id shape face x y depth]
+        optional = %w[radius width height]
+        exact_keys(params, base, optional)
+        WoodworkingAI.identifier(params['project_id'], 'project_id')
+        WoodworkingAI.identifier(params['part_id'], 'part_id')
+        raise ArgumentError, "shape must be 'circle' or 'rectangle'" unless %w[circle rectangle].include?(params['shape'])
+        raise ArgumentError, "face must be one of: #{WoodworkingAI::FACE_NORMALS.keys.join(', ')}" unless WoodworkingAI::FACE_NORMALS.key?(params['face'])
+        %w[x y depth].each { |k| Units.number(params[k], k) }
+        Units.number(params['depth'], 'depth', positive: true)
+        if params['shape'] == 'circle'
+          raise ArgumentError, 'radius is required for circle cutouts' unless params['radius']
+          Units.number(params['radius'], 'radius', positive: true)
+        else
+          raise ArgumentError, 'width and height are required for rectangle cutouts' unless params['width'] && params['height']
+          Units.number(params['width'], 'width', positive: true)
+          Units.number(params['height'], 'height', positive: true)
+        end
       else
         raise ArgumentError, 'Unknown command'
       end
@@ -75,7 +93,7 @@ module WoodworkingAI
       result = case request['command']
       when 'sketchup_status'
         {connected: true, sketchup_version: Sketchup.version, units: 'inches',
-         bridge_version: 3, commands: %w[sketchup_status create_board get_part create_project get_model get_parts update_part move_part delete_part fit_camera render_view save_model export_project get_model_summary]}
+         bridge_version: 3, commands: %w[sketchup_status create_board get_part create_project get_model get_parts update_part move_part delete_part fit_camera render_view save_model export_project get_model_summary add_cutout]}
       when 'create_board'
         raise ArgumentError, 'Use project tools to modify managed projects' if Sketchup.active_model.get_attribute(Projects::DICT, params['project_id'])
         args = params.transform_keys(&:to_sym)
@@ -120,6 +138,8 @@ module WoodworkingAI
         end
         raise ArgumentError, 'Part not found' if matches.empty?
         matches.size == 1 ? describe(matches.first) : {instances: matches.map { |part| describe(part) }}
+      when 'add_cutout'
+        WoodworkingAI.add_cutout(**params.transform_keys(&:to_sym))
       end
       {request_id: request['request_id'], success: true, result: result}
     rescue StandardError => e
