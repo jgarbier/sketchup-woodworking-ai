@@ -5,6 +5,7 @@ require 'securerandom'
 require 'fileutils'
 require_relative 'project_validation'
 require_relative 'geometry'
+require_relative 'drawers'
 module WoodworkingAI
   module Projects
     DICT = 'woodworking_ai_projects' unless const_defined?(:DICT, false)
@@ -51,9 +52,17 @@ module WoodworkingAI
       end
     end
 
+    def self.drawer_assembly_groups(model, id)
+      model.entities.grep(Sketchup::Group).select do |g|
+        g.get_attribute(DICTIONARY, 'project_id') == id && g.get_attribute(DICTIONARY, 'drawer_assembly_id')
+      end
+    end
+
     def self.instances(model, id)
       flat = model.entities.grep(Sketchup::ComponentInstance).select { |e| e.get_attribute(DICTIONARY, 'project_id') == id }
-      nested = door_assembly_groups(model, id).flat_map { |g| g.entities.grep(Sketchup::ComponentInstance).select { |e| e.get_attribute(DICTIONARY, 'project_id') == id } }
+      nested = (door_assembly_groups(model, id) + drawer_assembly_groups(model, id)).flat_map do |g|
+        g.entities.grep(Sketchup::ComponentInstance).select { |e| e.get_attribute(DICTIONARY, 'project_id') == id }
+      end
       flat + nested
     end
 
@@ -84,13 +93,16 @@ module WoodworkingAI
         disk = JSON.parse(File.read(disk_path))
         raise 'Project files differ from active model; resolve before editing' unless old && disk['revision'] == old['revision']
       end
-      # Remove door assembly groups for assemblies no longer in the definition before
+      # Remove door/drawer assembly groups for assemblies no longer in the definition before
       # collecting owned instances, so stale nested instances don't pollute the owned set.
-      current_da_keys = (definition['door_assemblies'] || []).map { |da| "#{id}/#{da['id']}" }
+      current_da_keys  = (definition['door_assemblies']   || []).map { |da| "#{id}/#{da['id']}" }
+      current_dra_keys = (definition['drawer_assemblies'] || []).map { |da| "#{id}/#{da['id']}" }
       model.entities.grep(Sketchup::Group).each do |g|
         next unless g.get_attribute(DICTIONARY, 'project_id') == id
-        da_key = g.get_attribute(DICTIONARY, 'door_assembly_id').to_s
-        g.erase! if !da_key.empty? && !current_da_keys.include?(da_key)
+        da_key  = g.get_attribute(DICTIONARY, 'door_assembly_id').to_s
+        dra_key = g.get_attribute(DICTIONARY, 'drawer_assembly_id').to_s
+        g.erase! if (!da_key.empty?  && !current_da_keys.include?(da_key)) ||
+                    (!dra_key.empty? && !current_dra_keys.include?(dra_key))
       end
       owned = instances(model, id)
       raise 'Owned component is locked' if owned.any?(&:locked?)
@@ -134,6 +146,29 @@ module WoodworkingAI
               new_inst = group.entities.add_instance(inst.definition, inst.transformation)
               inst.attribute_dictionaries&.each { |dict| dict.each_pair { |k, v| new_inst.set_attribute(dict.name, k, v) } }
               new_inst.set_attribute(DICTIONARY, 'door_assembly_id', da_key)
+              keep << new_inst
+              keep.delete(inst)
+              inst.erase!
+            end
+          end
+        end
+        # Move drawer assembly parts into named SketchUp groups.
+        (definition['drawer_assemblies'] || []).each do |da|
+          dra_key = "#{id}/#{da['id']}"
+          group = model.entities.grep(Sketchup::Group).find { |g| g.get_attribute(DICTIONARY, 'drawer_assembly_id') == dra_key }
+          unless group
+            group = model.entities.add_group
+            group.name = "Drawer — #{da['name']}"
+            group.set_attribute(DICTIONARY, 'drawer_assembly_id', dra_key)
+            group.set_attribute(DICTIONARY, 'project_id', id)
+            group.set_attribute(DICTIONARY, 'drawer_slide_type', da['slide_type'])
+            group.set_attribute(DICTIONARY, 'drawer_extension', da['extension'] || 'full')
+          end
+          da['parts'].each do |pid|
+            keep.select { |inst| inst.valid? && inst.get_attribute(DICTIONARY, 'part_id') == pid }.each do |inst|
+              new_inst = group.entities.add_instance(inst.definition, inst.transformation)
+              inst.attribute_dictionaries&.each { |dict| dict.each_pair { |k, v| new_inst.set_attribute(dict.name, k, v) } }
+              new_inst.set_attribute(DICTIONARY, 'drawer_assembly_id', dra_key)
               keep << new_inst
               keep.delete(inst)
               inst.erase!
