@@ -50,9 +50,14 @@ function dogBowlStandDefinition() {
     part('rear_left_leg',   'Rear Left Leg',   legH, legSq, legSq, {x:0,       y:rearY,  z:0}, {x:0,y:-90,z:0}),
     part('rear_right_leg',  'Rear Right Leg',  legH, legSq, legSq, {x:W-legSq, y:rearY,  z:0}, {x:0,y:-90,z:0}),
 
-    // Top panel: flat (no rotation) → length→X, width→Y, thickness→Z
-    // Bowl cutouts: two Ø8" holes, centered in each half, to be cut in shop
-    part('top', 'Top Panel', W, D, topT, {x:0, y:0, z:legH}, {x:0,y:0,z:0}),
+    // Top frame: 5 pieces that leave two 8"×8" square openings for bowls
+    // Layout: 1.5" front/back rim, 1.25" left/right ends, 2.5" center divider
+    // flat (no rotation) → length→X, width→Y, thickness→Z
+    part('top_front_rail',  'Top Front Rail',   W,    1.5, topT, {x:0,          y:0,   z:legH}, {x:0,y:0,z:0}),
+    part('top_back_rail',   'Top Back Rail',    W,    1.5, topT, {x:0,          y:9.5, z:legH}, {x:0,y:0,z:0}),
+    part('top_left_end',    'Top Left End',     legSq, 8,  topT, {x:0,          y:1.5, z:legH}, {x:0,y:0,z:0}),
+    part('top_center_div',  'Top Center Div',   2.5,   8,  topT, {x:9.25,       y:1.5, z:legH}, {x:0,y:0,z:0}),
+    part('top_right_end',   'Top Right End',    legSq, 8,  topT, {x:W-legSq,    y:1.5, z:legH}, {x:0,y:0,z:0}),
 
     // Front face slats: rx=90 → length→X, width→Z, thickness→Y
     part('front_slat', 'Front Slat', W, slatH, slatT,
@@ -77,7 +82,11 @@ function dogBowlStandDefinition() {
     materials: [{id: 'white_oak', species: 'white_oak', type: 'hardwood'}],
     parts,
     relationships: [
-      {part_id: 'top',         depends_on: ['front_left_leg','front_right_leg','rear_left_leg','rear_right_leg'], description: 'Top panel rests on legs'},
+      {part_id: 'top_front_rail', depends_on: ['front_left_leg','front_right_leg'], description: 'Front top rail rests on front legs'},
+      {part_id: 'top_back_rail',  depends_on: ['rear_left_leg','rear_right_leg'],  description: 'Back top rail rests on rear legs'},
+      {part_id: 'top_left_end',   depends_on: ['front_left_leg','rear_left_leg'],  description: 'Left end rests on left legs'},
+      {part_id: 'top_center_div', depends_on: ['front_left_leg','front_right_leg','rear_left_leg','rear_right_leg'], description: 'Center divider between bowl openings'},
+      {part_id: 'top_right_end',  depends_on: ['front_right_leg','rear_right_leg'], description: 'Right end rests on right legs'},
       {part_id: 'front_slat',  depends_on: ['front_left_leg','front_right_leg'], description: 'Front slats attach to front legs'},
       {part_id: 'rear_slat',   depends_on: ['rear_left_leg','rear_right_leg'],   description: 'Rear slats attach to rear legs'},
       {part_id: 'left_slat',   depends_on: ['front_left_leg','rear_left_leg'],   description: 'Left slats attach to left legs'},
@@ -87,8 +96,8 @@ function dogBowlStandDefinition() {
       'All dimensions are finished sizes in inches.',
       `Overall: ${W}"W × ${D}"D × ${H}"H.`,
       `Legs: ${legSq}" square solid white oak, ${legH}" tall.`,
-      `Top panel: ${topT}" thick white oak. Mark and cut two Ø8" circles centered at x=5.25" and x=15.75" (bowl center y=5.5") with a jig saw or router circle jig.`,
-      `Bowl lip: rout a 3/8" wide × 1/4" deep rabbet around each cutout so 8" bowls rest flush with the top surface.`,
+      `Top frame: ${topT}" thick white oak in 5 pieces — 1.5" front/back rails, 1.25" left/right ends, 2.5" center divider — leaving two 8"×8" square openings for bowls.`,
+      `Bowl fit: the square openings accept a round 8" bowl; the corners will be unsupported (bowl rim rests on the four straight edges). For a tighter fit, trace the bowl rim and jig-saw the opening to match.`,
       `Slats: ${slatT}" thick × ${slatH}" tall, 6 per face, spaced ${gap.toFixed(3)}" apart. Attach with glue and brad nails into leg faces.`,
       'Finish: oil+wax or water-based poly (food-safe when cured) to handle water splashes.',
       'Joinery: glue and finish nails for slat-to-leg; top can be pocket-screwed down from below.',
